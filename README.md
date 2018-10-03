@@ -1,10 +1,10 @@
 #SVG2Canvas Converter
 
-[在线演示 - http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/)
+[Online demo - http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/)
 
 #使用方式
 
-##目录结构
+##Directory Structure
 
 ```
 src/
@@ -16,69 +16,69 @@ src/
 index.html -- SVG to Canvas 工具
 ```
 
-##运行
+##Run
 
-请运行run.js或者run.sh，生成修改后的src/canvg2.js
+Please run run.js or run.sh to generate the modified src/canvg2.js
 ```
 cd src
 node run
 ```
-然后浏览器中访问index.html
+Then visit index.html in the browser.
 ![SVG to HTML5 Canvas](image/Screen-Shot-2015-04-30-at-6.16.41-PM-1024x581.png)
 
 #用途说明
 
 [http://blog.qunee.com/2015/04/svg-to-canvas在线转换工具/](http://blog.qunee.com/2015/04/svg-to-canvas在线转换工具/)
 
-HTML5中有两种图形解决方案：SVG和Canvas，两者都有各自特点，这里不多说，Qunee图形组件中我们常常使用SVG作为节点图标，这在大部分场景下都表现良好，但是IE下有些小问题，IE下可以将SVG图片绘制到Canvas上，但是无法读取SVG的像素信息，这意味着一些特殊功能（追踪图片边缘，图片染色等）无法被实现，这时候我们考虑选择将SVG解析，转换成Canvas的绘制代码，这样就可以使用Canvas来绘制SVG图片了
+There are two kinds of graphics solutions in HTML5: SVG and Canvas, both of which have their own characteristics. Not to mention here, we often use SVG as a node icon in Qunee graphics components, which performs well in most scenarios, but under IE Some minor problems, IE can draw SVG images to Canvas, but can not read SVG pixel information, which means that some special features (tracking image edges, image dyeing, etc.) can not be achieved, then we consider choosing SVG Parse, convert to Canvas drawing code, so you can use Canvas to draw SVG images
 
 ![SVG to HTML5 Canvas](http://blog.qunee.com/wp-content/uploads/2015/04/Screen-Shot-2015-04-30-at-6.48.15-PM-1024x567.png)
 
 ## canvg.js
 
-是的确实有人在做这样的事，[canvg.js](https://github.com/gabelerner/canvg) 就是一个将SVG转换成Canvas的工具库，甚至有些SVG的动画效果也能得到实现，但是canvg.js存在很多问题：
+Yes, someone is doing something like this. [Canvg.js](https://github.com/gabelerner/canvg) is a tool library for converting SVG to Canvas. Even some SVG animation effects can be achieved, but there are many problems with canvg.js:
 
-### 不可避免的SVG兼容问题
+### Inevitable SVG compatibility issues
 
-SVG是一种很复杂的矢量图形语言，完全转换到Canvas相当于写一个独立的SVG查看器，即使是Adobe的SVG Viewer也会存在兼容问题，更何况一个小小的js工具库
+SVG is a very complex vector graphics language. Converting to Canvas is equivalent to writing a standalone SVG viewer. Even Adobe's SVG Viewer will have compatibility issues, not to mention a small js tool library.
 
-### canvg.js无法生成Canvas绘制代码
+### Canvg.js cannot generate Canvas drawing code
 
-canvg.js确实能将SVG绘制到Canvas上，但是无法生成绘制代码，就意味着需要引入这个类库，且动态解析SVG，这里存在额外的性能开销，加上canvg.js本身并不完善，代码封装性还是功能上都存在缺陷，在生产环境中引入会带来问题
+Canvg.js can actually draw SVG onto Canvas, but can't generate drawing code, which means that you need to introduce this class library and dynamically parse SVG. There is extra performance overhead, plus canvg.js itself is not perfect, code Encapsulation or functionality is flawed, and introduction in the production environment will cause problems.
 
-###  professorcloud
+### Professor Cloud
 
-网上搜索svg to canvas，可以找到这个：[http://www.professorcloud.com/svg-to-canvas/ ](http://www.professorcloud.com/svg-to-canvas/)可以将SVG转换成Canvas，并输出javascript代码，符合制作矢量图标的需要，Qunee早期的内置icon都是这样制作的，但是这个工具并不完善，不支持渐变，不支持纹理，大部分的SVG图标无法转换，于是我们考虑自己写一个在线工具，以方便客户使用，我们查看了http://www.professorcloud.com/svg-to-canvas/ 的代码，它是在某个老版本的canvg.js基础上修改实现的，是写死的代码，不方便后期升级和维护，我们想到一种更好的方式来实现
+Search online svg to canvas, you can find this: [ProfessorCloud Svg-to-Canvas](http://www.professorcloud.com/svg-to-canvas/) can convert SVG into Canvas, and output javascript code, in line with the need to make vector icons, Qunee early built-in icon This is all done, but this tool is not perfect, does not support gradients, does not support textures, most SVG icons can not be converted, so we consider writing an online tool for the convenience of customers, we checked [ProfessorCloud Svg-to-Canvas](http://www.professorcloud.com/svg-to-canvas/) code, it is modified on the basis of an old version of canvg.js, is to write dead code, inconvenient to upgrade and maintain later, we think of a more Good way to achieve
 
 ## SVG2Canvas
 
-我们想到一种更好的方式实现SVG到Canvas代码的转换，在线地址：[http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/)
+We think of a better way to convert SVG to Canvas code, online address: [http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/)
 
-### 实现思路
+### Implementation Ideas
 
-通过重写HTMLCanvasElement相关的方法来实现，基本的思路就是将CanvasRenderingContext2D.prototype中的相关绘制和设置代码重写，增加上生产js代码的功能，比如对CanvasRenderingContext2D#fill()方法的处理，我们可能要重写这个方法
+By rewriting the HTMLCanvasElement related methods, the basic idea is to rewrite the related drawing and setting code in CanvasRenderingContext2D.prototype, and add the function of producing js code, such as the processing of CanvasRenderingContext2D#fill() method, we may want Rewrite this method
 <pre class="prettyprint">CanvasRenderingContext2D.prototype.fill2 = function(){
    this.fill();
-   appendCode('ctx.fill();\n');//生成js代码
+   appendCode('ctx.fill();\n'); // Generate js code
 }</pre>
-当然实际上要比这复杂，需要考虑如何重写方法？如何将参数对象转换成字符串？此外对于复杂的SVG，可能会需要创建临时的Canvas对象，还涉及到一些正则表达式，还要注意作用域的问题，花费了些功夫，实现了一套不错的工具，基本上canvg.js能支持的svg，都能很好的转换，支持Gradient, 支持Pattern等
+Of course, it is actually more complicated than this. Need to consider how to rewrite the method? How to convert a parameter object into a string? In addition, for complex SVG, you may need to create a temporary Canvas object, also involves some regular expressions, but also pay attention to the scope problem, spent a little effort, and implemented a good set of tools, basically canvg.js can Supported svg, can be very good conversion, support Gradient, support Pattern, etc.
 
-### 在线服务
+### Online Service
 
-好的东西如果只是自己使用，未免太浪费了，于是我们又花了不少时间将其做出了一个好的界面，并公布出来
+If a good thing is just used by itself, it is too wasteful, so we spent a lot of time to make a good interface and publish it.
 
-在线地址：[http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/)
+Online address：[http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/)
 
-支持Chrome, Safari浏览器，左中右布局分布，将svg文件拖拽到左侧虚线框中，即可生成Qunee for HTML5中相应的图片注册代码，并及时预览到图片在Qunee for HTML5中的展示效果，如下：
+Support Chrome, Safari browser, left and right layout distribution, drag and drop the svg file to the left dotted box, you can generate the corresponding image registration code in Qunee for HTML5, and preview the image in Qunee for HTML5. The effect is as follows:
 
 ![SVG to Canvas Code Converter](http://blog.qunee.com/wp-content/uploads/2015/04/Screen-Shot-2015-04-30-at-6.16.41-PM-1024x581.png)
 
-### 使用生成的代码
+### Use the generated code
 
-将右侧文本框中的代码保存到js文件（比如SVGIcons.js），并在HTML中引入这个js，之后你就可以直接使用svg文件名作为节点图标了
+Save the code in the right text box to the js file (such as SVGIcons.js), and introduce the js in the HTML, then you can directly use the svg file name as the node icon.
 <pre class="prettyprint">node.image = 'DataCenter.svg';
 </pre>
-示例代码
+Sample code:
 <pre class="prettyprint">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
@@ -99,6 +99,6 @@ node.image = 'DataCenter.svg';
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-**运行效果**
+Running Result:
 
 ![hello svg](http://blog.qunee.com/wp-content/uploads/2015/04/Screen-Shot-2015-04-30-at-5.35.31-PM.png)
